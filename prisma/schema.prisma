@@ -41,10 +41,11 @@ model Session {
 }
 
 model User {
-  id    String @id @default(cuid())
-  name  String
-  image String
-  email String @unique
+  id            String    @id @default(cuid())
+  name          String
+  image         String
+  email         String    @unique
+  emailVerified DateTime?
 
   Account     Account[]
   Session     Session[]
@@ -60,10 +61,10 @@ enum UploadStatus {
 }
 
 model Resume {
-  id         String   @id @default(cuid())
-  content    String
-  createdAt  DateTime @default(now())
-  updattedAt DateTime @updatedAt
+  id           String       @id @default(cuid())
+  content      String
+  createdAt    DateTime     @default(now())
+  updattedAt   DateTime     @updatedAt
   resumeStatus UploadStatus @default(PENDING)
 
   userId      String
