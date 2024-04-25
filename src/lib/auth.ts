@@ -38,7 +38,7 @@ export const authOptions: NextAuthOptions = {
             return token;
         },
         redirect(){
-            return "/"
+            return "/dashboard"
         }
     }
 }

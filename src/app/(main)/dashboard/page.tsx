@@ -8,6 +8,34 @@ import Link from 'next/link'
 import React from 'react'
 
 const page = () => {
+
+  const tools = [
+    {
+      logo: FileTerminal,
+      title: "Generate Cover Letter",
+      description: "Start Creating by uploading your Resume",
+      href: "/generate",
+      tag: "Uplaod Resume",
+      footer: ""
+    },
+    {
+      logo: FileTerminal,
+      title: "Generate Cover Letter",
+      description: "Start Creating by uploading your Resume",
+      href: "/generate",
+      tag: "Uplaod Resume",
+      footer: ""
+    },
+    {
+      logo: FileTerminal,
+      title: "Generate Cover Letter",
+      description: "Start Creating by uploading your Resume",
+      href: "/generate",
+      tag: "Uplaod Resume",
+      footer: ""
+    }
+  ]
+
   return (
     <div className='w-full h-full text-black dark:text-white'>
       <div className=''>
@@ -19,7 +47,32 @@ const page = () => {
             <Separator className='my-3'/>
         </div>
         <div className='grid md:grid-cols-2 mx-16 gap-8 grid-rows-2'>
-          <Card className='hover:border-black border-2 dark:hover:border-white outline outline-1 transition-all'>
+          {tools.map((tool)=> (
+            <Card key={tool.href} className='hover:border-black border-2 dark:hover:border-white outline outline-1 transition-all'>
+              <CardHeader className='flex  gap-1'>
+                <CardTitle className='flex'>
+                  <tool.logo className='w-6 h-6 mr-2'/>
+                  {tool.title}
+                </CardTitle>
+                <CardDescription className='text-md font-bold'>{tool.description}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href={tool.href} className={cn(buttonVariants({variant: 'language'}))}>{tool.tag}</Link>
+              </CardContent>
+              <CardFooter>
+                {/* <p>Card Footer</p> */}
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default page
+
+{/* <Card className='hover:border-black border-2 dark:hover:border-white outline outline-1 transition-all'>
               <CardHeader className='flex  gap-1'>
                 <CardTitle className='flex'>
                   <FileTerminal className='w-6 h-6 mr-2'/>
@@ -32,24 +85,17 @@ const page = () => {
               </CardContent>
               <CardFooter>
                 {/* <p>Card Footer</p> */}
-              </CardFooter>
-          </Card>
-          <Card className='hover:border-black border-2 dark:hover:border-white outline outline-1 transition-all'>
-              <CardHeader>
-                <CardTitle>Card Title</CardTitle>
-                <CardDescription>Card Description</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>Card Content</p>
-              </CardContent>
-              <CardFooter>
-                <p>Card Footer</p>
-              </CardFooter>
-          </Card>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export default page
+          //     </CardFooter>
+          // </Card>
+          // <Card className='hover:border-black border-2 dark:hover:border-white outline outline-1 transition-all'>
+          //     <CardHeader>
+          //       <CardTitle>Card Title</CardTitle>
+          //       <CardDescription>Card Description</CardDescription>
+          //     </CardHeader>
+          //     <CardContent>
+          //       <p>Card Content</p>
+          //     </CardContent>
+          //     <CardFooter>
+          //       <p>Card Footer</p>
+          //     </CardFooter>
+          // </Card> */}

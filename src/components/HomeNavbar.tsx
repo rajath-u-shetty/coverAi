@@ -15,7 +15,7 @@ const HomeNavbar = async() => {
         {session?.user ? (
           <div className="flex gap-2 items-center pl-10">
             <Link href={"/dashboard"} className={cn("", buttonVariants({variant: "default"}))}>Dashboard</Link>
-            {session?.user ? <UserDropdown /> : null}
+            {/* {session?.user ? <UserDropdown /> : null} */}
           </div>
         ) : (
             <Link href={"/sign-in"} className={cn("", buttonVariants({variant: "default"}))}>SignIn</Link>
