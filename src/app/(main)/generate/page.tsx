@@ -1,10 +1,11 @@
 import FileUploadModal from '@/components/FileUploadModal'
+import MultiPageForm from '@/components/multiPageForm'
 import React from 'react'
 
 const page = () => {
   return (
     <div>
-      <FileUploadModal />
+      <MultiPageForm />
     </div>
   )
 }

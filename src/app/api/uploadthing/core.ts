@@ -5,7 +5,9 @@ import { UploadThingError } from "uploadthing/server";
 const f = createUploadthing();
 
 const handleAuth = async() => {
+
   const session = await getAuthSession();
+
   if(!session?.user){
     throw new UploadThingError("UnAuthorized") 
   }
@@ -13,12 +15,11 @@ const handleAuth = async() => {
 }
 
 export const ourFileRouter = {
-  mediaPost: f({
-    pdf: {maxFileSize: "4MB", maxFileCount: 1},
-    text: {maxFileSize: "2MB", maxFileCount: 1}
-  })
+  pdfUploader: f({ pdf: { maxFileSize: "4MB" } })
   .middleware(()=> handleAuth())
   .onUploadComplete((data) => console.log(data))
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
+
+

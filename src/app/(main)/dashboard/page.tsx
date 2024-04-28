@@ -3,7 +3,7 @@ import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import { FileTerminal } from 'lucide-react'
+import { FileTerminal, History } from 'lucide-react'
 import Link from 'next/link'
 import React from 'react'
 
@@ -19,21 +19,13 @@ const page = () => {
       footer: ""
     },
     {
-      logo: FileTerminal,
-      title: "Generate Cover Letter",
-      description: "Start Creating by uploading your Resume",
-      href: "/generate",
-      tag: "Uplaod Resume",
+      logo: History,
+      title: "View History",
+      description: "Checkout your previous generations",
+      href: "/history",
+      tag: "Download",
       footer: ""
     },
-    {
-      logo: FileTerminal,
-      title: "Generate Cover Letter",
-      description: "Start Creating by uploading your Resume",
-      href: "/generate",
-      tag: "Uplaod Resume",
-      footer: ""
-    }
   ]
 
   return (

@@ -33,16 +33,17 @@ const FileUpload = ({
         )
     }
   return (
-    <UploadDropzone 
-        endpoint={endpoint}
-        onClientUploadComplete={(res) => {
-            onChange(res?.[0].url)
-        }}
-        onUploadError={(error: Error) => {
-            console.log(error);
+    // <UploadDropzone 
+    //      endpoint={endpoint}
+    //     onClientUploadComplete={(res) => {
+    //         onChange(res?.[0].url)
+    //     }}
+    //     onUploadError={(error: Error) => {
+    //         console.log(error);
             
-        }}
-    />
+    //     }}
+    // />
+    <div></div>
   )
 }
 
