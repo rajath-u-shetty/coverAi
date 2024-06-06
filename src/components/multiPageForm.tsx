@@ -83,7 +83,11 @@ const MultiPageForm = () => {
                 )}
               />
 
-              <Button type="submit" disabled={isLoading} className="w-full">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full mt-1"
+              >
                 Submit
               </Button>
             </div>
