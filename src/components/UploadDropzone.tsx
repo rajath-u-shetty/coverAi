@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-
 import Dropzone from "react-dropzone";
 import { Cloud, File, Loader2 } from "lucide-react";
 import { Progress } from "./ui/progress";

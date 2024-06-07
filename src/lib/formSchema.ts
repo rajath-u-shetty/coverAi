@@ -18,4 +18,4 @@ export const formValidator = z.object({
   }),
 });
 
-export type FormCreationrequest = z.infer<typeof formValidator>;
+export type FormCreationPayload = z.infer<typeof formValidator>;

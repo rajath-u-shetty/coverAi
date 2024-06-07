@@ -1,7 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { formSchema } from "@/lib/formSchema";
 import * as z from "zod";
 import {
   Form,
@@ -16,10 +15,11 @@ import axios from "axios";
 import UploadDropzone from "./UploadDropzone";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
+import { formValidator } from "@/lib/formSchema";
 
 const MultiPageForm = () => {
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof formValidator>>({
+    resolver: zodResolver(formValidator),
     defaultValues: {
       requirements: "",
       pdfFile: "",
@@ -29,9 +29,10 @@ const MultiPageForm = () => {
 
   const isLoading = form.formState.isSubmitting;
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formValidator>) => {
     try {
-      axios.post("/api/generate", values);
+      await axios.post("/api/generate", values);
+      form.reset();
     } catch (error) { }
   };
 
