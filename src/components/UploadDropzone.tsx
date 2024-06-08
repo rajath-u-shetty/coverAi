@@ -6,6 +6,7 @@ import { Cloud, File, Loader2 } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { useToast } from "./ui/use-toast";
 import { useUploadThing } from "@/lib/uploadthing";
+import { pdfParse } from "pdf-parse-fork";
 
 const UploadDropzone = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -73,6 +74,10 @@ const UploadDropzone = () => {
 
         clearInterval(progressInterval);
         setUploadProgress(100);
+
+        const data = await pdfParse(acceptedFile[0]);
+
+        console.log(data.text);
       }}
     >
       {({ getRootProps, getInputProps, acceptedFiles }) => (
