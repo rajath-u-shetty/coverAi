@@ -6,7 +6,7 @@ import { Cloud, File, Loader2 } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { useToast } from "./ui/use-toast";
 import { useUploadThing } from "@/lib/uploadthing";
-import { pdfParse } from "pdf-parse-fork";
+import axios from "axios";
 
 const UploadDropzone = () => {
   const [isUploading, setIsUploading] = useState<boolean>(false);
@@ -29,6 +29,36 @@ const UploadDropzone = () => {
     }, 500);
 
     return interval;
+  };
+
+  const handleFileUpload = async (file: any) => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await axios.post("/api/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      if (response.status === 200) {
+        toast({
+          title: "Success",
+          description: "File uploaded successfully",
+          variant: "default",
+        });
+      }
+
+      console.log(response.data);
+      console.log(response);
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -75,9 +105,7 @@ const UploadDropzone = () => {
         clearInterval(progressInterval);
         setUploadProgress(100);
 
-        const data = await pdfParse(acceptedFile[0]);
-
-        console.log(data.text);
+        await handleFileUpload(acceptedFile[0]);
       }}
     >
       {({ getRootProps, getInputProps, acceptedFiles }) => (
@@ -130,6 +158,7 @@ const UploadDropzone = () => {
               <input
                 {...getInputProps()}
                 type="file"
+                name="uploaddropzone"
                 id="dropzone-file"
                 className="hidden"
               />
