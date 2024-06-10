@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import Dropzone from "react-dropzone";
-import { Cloud, File, Loader2 } from "lucide-react";
+import { Cloud, File } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { useToast } from "./ui/use-toast";
 import { useUploadThing } from "@/lib/uploadthing";
 import axios from "axios";
 
-const UploadDropzone = () => {
-  const [isUploading, setIsUploading] = useState<boolean>(false);
-  const [uploadProgress, setUploadProgress] = useState<number>(0);
+const UploadDropzone = ({ onFileUpload }: any) => {
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
 
   const { startUpload } = useUploadThing("pdfUploader");
@@ -31,42 +31,12 @@ const UploadDropzone = () => {
     return interval;
   };
 
-  const handleFileUpload = async (file: any) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const response = await axios.post("/api/upload", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response.status === 200) {
-        toast({
-          title: "Success",
-          description: "File uploaded successfully",
-          variant: "default",
-        });
-      }
-
-      console.log(response.data);
-      console.log(response);
-    } catch (error) {
-      toast({
-        title: "Something went wrong",
-        description: "Please try again later",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <Dropzone
       multiple={false}
-      onDrop={async (acceptedFile) => {
-        if (acceptedFile[0].name.split(".")[1] !== "pdf") {
-          acceptedFile.length = 0;
+      onDrop={async (acceptedFiles) => {
+        if (acceptedFiles[0].name.split(".").pop() !== "pdf") {
+          acceptedFiles.length = 0;
           return toast({
             title: "Invalid file type",
             description: "Please upload a PDF file",
@@ -78,9 +48,12 @@ const UploadDropzone = () => {
         const progressInterval = startSimulatedProgress();
 
         // handle file uploading
-        const res = await startUpload(acceptedFile);
+        const res = await startUpload(acceptedFiles);
 
         if (!res) {
+          clearInterval(progressInterval);
+          setUploadProgress(0);
+          setIsUploading(false);
           return toast({
             title: "Something went wrong",
             description: "Please try again later",
@@ -89,10 +62,12 @@ const UploadDropzone = () => {
         }
 
         const [fileResponse] = res;
-
         const key = fileResponse?.key;
 
         if (!key) {
+          clearInterval(progressInterval);
+          setUploadProgress(0);
+          setIsUploading(false);
           return toast({
             title: "Something went wrong",
             description: "Please try again later",
@@ -100,12 +75,33 @@ const UploadDropzone = () => {
           });
         }
 
-        // console.log(key);
-
         clearInterval(progressInterval);
         setUploadProgress(100);
 
-        await handleFileUpload(acceptedFile[0]);
+        try {
+          const response = await axios.post("/api/upload", acceptedFiles[0]);
+
+          if (response.status === 200) {
+            toast({
+              title: "Success",
+              description: "File uploaded successfully",
+              variant: "default",
+            });
+
+            // Call onFileUpload with the uploaded file
+            onFileUpload(acceptedFiles[0]);
+          }
+
+          console.log(response.data);
+        } catch (error) {
+          toast({
+            title: "Something went wrong",
+            description: "Please try again later",
+            variant: "destructive",
+          });
+        } finally {
+          setIsUploading(false);
+        }
       }}
     >
       {({ getRootProps, getInputProps, acceptedFiles }) => (
@@ -158,7 +154,7 @@ const UploadDropzone = () => {
               <input
                 {...getInputProps()}
                 type="file"
-                name="uploaddropzone"
+                name="file"
                 id="dropzone-file"
                 className="hidden"
               />

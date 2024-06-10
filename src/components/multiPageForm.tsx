@@ -21,7 +21,7 @@ import { useToast } from "./ui/use-toast";
 
 const MultiPageForm = () => {
   const [uploadedfile, setuploadedfile] = React.useState<any>(null);
-  const toast = useToast();
+  const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formValidator>>({
     resolver: zodResolver(formValidator),
@@ -59,6 +59,13 @@ const MultiPageForm = () => {
         },
       });
 
+      const result = await axios.post("/api/chatgpt", {
+        title: values.title,
+        requirements: values.requirements,
+        pdfContent: response.data,
+      });
+
+      console.log(result.data);
       form.reset();
     } catch (error) { }
   };
@@ -69,7 +76,7 @@ const MultiPageForm = () => {
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <div className="border md:min-w-[900px] border-slate-300 dark:border-slate-700 rounded-lg p-12 flex justify-evenly gap-6 w-full">
             <div className="w-1/2">
-              <UploadDropzone onFileUpload={handleFileUpload} />
+              <UploadDropzone onFileUpload={handleFileupload} />
             </div>
             <div className="w-1/2">
               <FormField
