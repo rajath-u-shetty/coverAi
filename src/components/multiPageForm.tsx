@@ -20,7 +20,7 @@ import React from "react";
 import { useToast } from "./ui/use-toast";
 
 const MultiPageForm = () => {
-  const [uploadedfile, setuploadedfile] = React.useState<any>(null);
+  const [parsedPdfText, setParsedPdfText] = React.useState<any>(null);
   const { toast } = useToast();
 
   const form = useForm<z.infer<typeof formValidator>>({
@@ -34,12 +34,12 @@ const MultiPageForm = () => {
 
   const isLoading = form.formState.isSubmitting;
 
-  const handleFileupload = (file: any) => {
-    setuploadedfile(file);
+  const handleFileupload = (parsedText: string) => {
+    setParsedPdfText(parsedText);
   };
 
   const onSubmit = async (values: z.infer<typeof formValidator>) => {
-    if (!uploadedfile) {
+    if (!parsedPdfText) {
       toast({
         title: "No file uploaded",
         description: "Please upload a PDF file",
@@ -49,23 +49,17 @@ const MultiPageForm = () => {
 
     try {
       const formData = new FormData();
-      formData.append("pdfFile", uploadedfile);
+      formData.append("pdfFile", parsedPdfText);
       formData.append("title", values.title);
       formData.append("requirements", values.requirements);
 
-      const response = await axios.post("/api/generate", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const result = await axios.post("/api/chatgpt", {
+      const response = await axios.post("/api/chatgpt", {
         title: values.title,
         requirements: values.requirements,
-        pdfContent: response.data,
+        pdfContent: parsedPdfText,
       });
 
-      console.log(result.data);
+      console.log(response.data);
       form.reset();
     } catch (error) { }
   };

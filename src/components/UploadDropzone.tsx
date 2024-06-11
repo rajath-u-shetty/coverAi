@@ -8,7 +8,7 @@ import { useToast } from "./ui/use-toast";
 import { useUploadThing } from "@/lib/uploadthing";
 import axios from "axios";
 
-const UploadDropzone = ({ onFileUpload }: any) => {
+const UploadDropzone = (onFileUpload: any) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
@@ -75,11 +75,15 @@ const UploadDropzone = ({ onFileUpload }: any) => {
           });
         }
 
-        clearInterval(progressInterval);
-        setUploadProgress(100);
-
         try {
-          const response = await axios.post("/api/upload", acceptedFiles[0]);
+          const formData = new FormData();
+          formData.append("file", acceptedFiles[0]);
+
+          const response = await axios.post("/api/upload", formData, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
 
           if (response.status === 200) {
             toast({
@@ -89,7 +93,9 @@ const UploadDropzone = ({ onFileUpload }: any) => {
             });
 
             // Call onFileUpload with the uploaded file
-            onFileUpload(acceptedFiles[0]);
+            clearInterval(progressInterval);
+            setUploadProgress(100);
+            onFileUpload(response.data);
           }
 
           console.log(response.data);
