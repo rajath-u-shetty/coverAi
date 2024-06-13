@@ -6,35 +6,48 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: NextRequest) {
-  try {
-    const { title, requirements, pdfContent } = await req.json();
+  const { title, requirements, pdfContent } = await req.json();
 
-    // Construct the OpenAI API request
-    const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "system",
-          content:
-            "act as a cover letter generator that takes resume of the user as input and the job title and requirements",
-        },
-        {
-          role: "user",
-          content: `Job title: ${title}, Requirements: ${requirements}, PDF Content: ${pdfContent}`,
-        },
-      ],
-    });
+  // Set up headers for SSE
+  const headers = new Headers();
+  headers.append("Content-Type", "text/event-stream");
+  headers.append("Cache-Control", "no-cache");
+  headers.append("Connection", "keep-alive");
 
-    // Parse the response from OpenAI
-    const completion = response.choices[0].message.content;
+  const stream = new ReadableStream({
+    async start(controller) {
+      try {
+        // Construct the OpenAI API request with streaming
+        const response = await openai.chat.completions.create({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are an expert in writing professional cover letters. Your task is to generate a compelling and personalized cover letter based on the job title, job requirements, and the user's resume content provided by the user.",
+            },
+            {
+              role: "user",
+              content: `Job Title: ${title}\nJob Requirements: ${requirements}\nResume Content: ${pdfContent}`,
+            },
+          ],
+          stream: true,
+        });
 
-    // Return the response as JSON
-    return NextResponse.json({ completion });
-  } catch (error) {
-    console.error("Error in /api/chatgpt:", error);
-    return NextResponse.json(
-      { error: "An error occurred while processing your request." },
-      { status: 500 },
-    );
-  }
+        for await (const chunk of response) {
+          const text = chunk.choices[0].delta?.content || "";
+          controller.enqueue(`data: ${text}\n\n`);
+        }
+        controller.close();
+      } catch (error) {
+        console.error("Error in /api/chatgpt:", error);
+        controller.error(error);
+      }
+    },
+    cancel() {
+      console.log("Stream canceled");
+    },
+  });
+
+  return new NextResponse(stream, { headers });
 }

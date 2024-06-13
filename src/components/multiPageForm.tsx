@@ -18,10 +18,12 @@ import { Button } from "./ui/button";
 import { formValidator } from "@/lib/formSchema";
 import React from "react";
 import { useToast } from "./ui/use-toast";
+import { useRouter } from "next/navigation";
 
 const MultiPageForm = () => {
   const [parsedPdfText, setParsedPdfText] = React.useState<any>(null);
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formValidator>>({
     resolver: zodResolver(formValidator),
@@ -35,16 +37,21 @@ const MultiPageForm = () => {
   const isLoading = form.formState.isSubmitting;
 
   const handleFileupload = (parsedText: string) => {
+    console.log("File uploaded:", parsedText);
     setParsedPdfText(parsedText);
   };
+  console.log("File uploaded:", parsedPdfText);
 
   const onSubmit = async (values: z.infer<typeof formValidator>) => {
+    console.log("onSubmit called with values:", values);
+
     if (!parsedPdfText) {
       toast({
         title: "No file uploaded",
         description: "Please upload a PDF file",
         variant: "destructive",
       });
+      return;
     }
 
     try {
@@ -53,15 +60,43 @@ const MultiPageForm = () => {
       formData.append("title", values.title);
       formData.append("requirements", values.requirements);
 
-      const response = await axios.post("/api/chatgpt", {
-        title: values.title,
-        requirements: values.requirements,
-        pdfContent: parsedPdfText,
+      console.log("Form data:", formData);
+
+      const response = await axios.post("/api/chatgpt", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      console.log(response.data);
+      console.log("Response:", response);
+
+      if (response.status !== 200) {
+        return toast({
+          title: "Something went wrong",
+          description: "Please try again later @multipageform",
+          variant: "destructive",
+        });
+      }
+
+      if (!response.data) {
+        return toast({
+          title: "No response from chatgpt",
+          description: "Please try again later @multipageform",
+          variant: "destructive",
+        });
+      }
+
+      console.log("Response data:", response.data);
       form.reset();
-    } catch (error) { }
+      router.push("/letter");
+    } catch (error) {
+      console.error("Error:", error);
+      return toast({
+        title: "Something went wrong",
+        description: "Please try again later @multipageform",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

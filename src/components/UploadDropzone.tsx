@@ -8,7 +8,7 @@ import { useToast } from "./ui/use-toast";
 import { useUploadThing } from "@/lib/uploadthing";
 import axios from "axios";
 
-const UploadDropzone = (onFileUpload: any) => {
+const UploadDropzone = ({ onFileUpload }: any) => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
@@ -55,8 +55,8 @@ const UploadDropzone = (onFileUpload: any) => {
           setUploadProgress(0);
           setIsUploading(false);
           return toast({
-            title: "Something went wrong",
-            description: "Please try again later",
+            title: "upload unsuccessful",
+            description: "Please try again later @dropzone",
             variant: "destructive",
           });
         }
@@ -70,7 +70,7 @@ const UploadDropzone = (onFileUpload: any) => {
           setIsUploading(false);
           return toast({
             title: "Something went wrong",
-            description: "Please try again later",
+            description: "key not found @dropzone",
             variant: "destructive",
           });
         }
@@ -98,11 +98,13 @@ const UploadDropzone = (onFileUpload: any) => {
             onFileUpload(response.data);
           }
 
-          console.log(response.data);
+          //console.log(response.data);
         } catch (error) {
+          console.log(error);
+
           toast({
             title: "Something went wrong",
-            description: "Please try again later",
+            description: "Please try again later @dropzone",
             variant: "destructive",
           });
         } finally {
