@@ -37,10 +37,10 @@ const MultiPageForm = () => {
   const isLoading = form.formState.isSubmitting;
 
   const handleFileupload = (parsedText: string) => {
-    console.log("File uploaded:", parsedText);
+    // console.log("File uploaded:", parsedText);
     setParsedPdfText(parsedText);
   };
-  console.log("File uploaded:", parsedPdfText);
+  // console.log("File uploaded:", parsedPdfText);
 
   const onSubmit = async (values: z.infer<typeof formValidator>) => {
     console.log("onSubmit called with values:", values);
@@ -60,7 +60,7 @@ const MultiPageForm = () => {
       formData.append("title", values.title);
       formData.append("requirements", values.requirements);
 
-      console.log("Form data:", formData);
+      // console.log("Form data:", formData);
 
       const response = await axios.post("/api/chatgpt", formData, {
         headers: {

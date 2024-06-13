@@ -95,10 +95,11 @@ const UploadDropzone = ({ onFileUpload }: any) => {
             // Call onFileUpload with the uploaded file
             clearInterval(progressInterval);
             setUploadProgress(100);
+            // console.log(response);
             onFileUpload(response.data);
           }
 
-          //console.log(response.data);
+          // console.log(response.data);
         } catch (error) {
           console.log(error);
 
