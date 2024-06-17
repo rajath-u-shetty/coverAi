@@ -21,7 +21,7 @@ import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 
 const MultiPageForm = () => {
-  const [parsedPdfText, setParsedPdfText] = React.useState<any>(null);
+  const [parsedPdfText, setParsedPdfText] = React.useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -37,10 +37,9 @@ const MultiPageForm = () => {
   const isLoading = form.formState.isSubmitting;
 
   const handleFileupload = (parsedText: string) => {
-    // console.log("File uploaded:", parsedText);
+    console.log("File uploaded:", parsedText);
     setParsedPdfText(parsedText);
   };
-  // console.log("File uploaded:", parsedPdfText);
 
   const onSubmit = async (values: z.infer<typeof formValidator>) => {
     console.log("onSubmit called with values:", values);
@@ -54,13 +53,17 @@ const MultiPageForm = () => {
       return;
     }
 
+    console.log("Parsed PDF Text:", parsedPdfText);
+
     try {
       const formData = new FormData();
       formData.append("pdfFile", parsedPdfText);
       formData.append("title", values.title);
       formData.append("requirements", values.requirements);
 
-      // console.log("Form data:", formData);
+      formData.forEach((value, key) => {
+        console.log(key, value);
+      });
 
       const response = await axios.post("/api/chatgpt", formData, {
         headers: {

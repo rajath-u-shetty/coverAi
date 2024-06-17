@@ -37,8 +37,8 @@ const page = () => {
   return (
     <div className="w-full h-full text-black dark:text-white">
       <div className="">
-        <div className="py-10">
-          <div className="flex justify-between items-center mx-10">
+        <div className="p-10">
+          <div className="flex justify-between items-center">
             <h1 className="text-3xl">DashBoard</h1>
             <ModeToggle />
           </div>
