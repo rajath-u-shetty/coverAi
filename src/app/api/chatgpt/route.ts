@@ -6,13 +6,8 @@ const openai = new OpenAI({
 });
 
 export async function POST(req: NextRequest) {
-  const { title, requirements, pdfContent } = await req.json();
-
-  // Set up headers for SSE
-  const headers = new Headers();
-  headers.append("Content-Type", "text/event-stream");
-  headers.append("Cache-Control", "no-cache");
-  headers.append("Connection", "keep-alive");
+  const { title, requirements, pdfFile } = await req.json();
+  console.log("in CHATGPT/route.ts", pdfFile);
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -28,7 +23,7 @@ export async function POST(req: NextRequest) {
             },
             {
               role: "user",
-              content: `Job Title: ${title}\nJob Requirements: ${requirements}\nResume Content: ${pdfContent}`,
+              content: `Job Title: ${title}\nJob Requirements: ${requirements}\nResume Content: ${pdfFile}`,
             },
           ],
           stream: true,
@@ -49,5 +44,5 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  return new NextResponse(stream, { headers });
+  return new NextResponse(stream);
 }

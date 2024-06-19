@@ -15,15 +15,17 @@ import axios from "axios";
 import UploadDropzone from "./UploadDropzone";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import { formValidator } from "@/lib/formSchema";
-import React from "react";
+import React, { useState } from "react";
 import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
+import { formValidator } from "@/lib/formSchema";
+import IconAnimation from "./IconAnimation";
+import { Separator } from "./ui/separator";
 
 const MultiPageForm = () => {
-  const [parsedPdfText, setParsedPdfText] = React.useState<string | null>(null);
+  const [parsedPdfText, setParsedPdfText] = useState<string | null>(null);
+  const [formSubmitted, setFormSubmitted] = useState(true);
   const { toast } = useToast();
-  const router = useRouter();
 
   const form = useForm<z.infer<typeof formValidator>>({
     resolver: zodResolver(formValidator),
@@ -36,9 +38,10 @@ const MultiPageForm = () => {
 
   const isLoading = form.formState.isSubmitting;
 
-  const handleFileupload = (parsedText: string) => {
+  const handleFileUpload = (parsedText: string) => {
     console.log("File uploaded:", parsedText);
     setParsedPdfText(parsedText);
+    form.setValue("pdfFile", parsedText); // Set the pdfFile field with parsed text
   };
 
   const onSubmit = async (values: z.infer<typeof formValidator>) => {
@@ -56,19 +59,10 @@ const MultiPageForm = () => {
     console.log("Parsed PDF Text:", parsedPdfText);
 
     try {
-      const formData = new FormData();
-      formData.append("pdfFile", parsedPdfText);
-      formData.append("title", values.title);
-      formData.append("requirements", values.requirements);
-
-      formData.forEach((value, key) => {
-        console.log(key, value);
-      });
-
-      const response = await axios.post("/api/chatgpt", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const response = await axios.post("/api/chatgpt", {
+        pdfFile: values.pdfFile,
+        title: values.title,
+        requirements: values.requirements,
       });
 
       console.log("Response:", response);
@@ -90,8 +84,9 @@ const MultiPageForm = () => {
       }
 
       console.log("Response data:", response.data);
+
+      setFormSubmitted(false);
       form.reset();
-      router.push("/letter");
     } catch (error) {
       console.error("Error:", error);
       return toast({
@@ -106,58 +101,84 @@ const MultiPageForm = () => {
     <div className="flex items-center justify-center h-screen w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="border md:min-w-[900px] border-slate-300 dark:border-slate-700 rounded-lg p-12 flex justify-evenly gap-6 w-full">
-            <div className="w-1/2">
-              <UploadDropzone onFileUpload={handleFileupload} />
+          <div className="border md:min-w-[900px]  border-slate-900 outline outline-1  rounded-lg p-10 max-w-96">
+            <div className="h-36 border-white flex flex-col  gap-4  ">
+              <h2 className="items-center  text-4xl font-bold bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500 bg-clip-text text-transparent ">
+                Cover Letter Generator
+              </h2>
+              <p className="text-md text-wrap">
+                Speed up the job application process with Grammarly’s AI-powered
+                cover letter generator, which helps you create a standout cover
+                letter in three quick steps.
+              </p>
             </div>
-            <div className="w-1/2">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Enter Job Title</FormLabel>
-                    <FormControl>
-                      <Input
-                        className="w-full"
-                        placeholder="Example: Full Stack Developer"
-                        {...field}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
+            <Separator className="mx-0" />
+            {formSubmitted ? (
+              <div className="flex justify-center items-center gap-7 mt-5">
+                <div className="w-1/2 h-max">
+                  <FormField
+                    control={form.control}
+                    name="pdfFile"
+                    render={() => (
+                      <FormItem>
+                        <UploadDropzone onFileUpload={handleFileUpload} />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="w-1/2 flex flex-col gap-4">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Enter Job Title</FormLabel>
+                        <FormControl>
+                          <Input
+                            className="w-full mb-5"
+                            placeholder="Example: Full Stack Developer"
+                            {...field}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
 
-              <FormField
-                control={form.control}
-                name="requirements"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Add job details</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        className="h-56"
-                        placeholder={`Responsibilities:
+                  <FormField
+                    control={form.control}
+                    name="requirements"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Add job details</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            className="h-56"
+                            placeholder={`Responsibilities:
 - Write clear, concise copy for user interfaces, emails, notifications, and error messages.
 - Collaborate with cross-functional partners to ensure UX copy aligns with product vision and user needs.
 - Develop and maintain style guides and content standards to ensure consistency and quality.
 - Continuously analyze user data and feedback to identify opportunities for improving UX copy.`}
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="w-full mt-1"
-              >
-                Submit
-              </Button>
-            </div>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full -mt-1"
+                  >
+                    Submit
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-screen w-full"></div>
+            )}
           </div>
         </form>
       </Form>

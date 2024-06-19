@@ -15,18 +15,29 @@ import axios from "axios";
 import UploadDropzone from "./UploadDropzone";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import { formValidator } from "@/lib/formSchema";
 import React from "react";
 import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
+
+const schema = z
+  .object({
+    title: z
+      .string()
+      .min(5, { message: "Title must be at least 5 characters" }),
+    requirements: z
+      .string()
+      .min(10, { message: "Requirements must be at least 10 characters" }),
+    pdfFile: z.string().nonempty({ message: "PDF file is required" }),
+  })
+  .required();
 
 const MultiPageForm = () => {
   const [parsedPdfText, setParsedPdfText] = React.useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof formValidator>>({
-    resolver: zodResolver(formValidator),
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
     defaultValues: {
       requirements: "",
       pdfFile: "",
@@ -36,12 +47,13 @@ const MultiPageForm = () => {
 
   const isLoading = form.formState.isSubmitting;
 
-  const handleFileupload = (parsedText: string) => {
+  const handleFileUpload = (parsedText: string) => {
     console.log("File uploaded:", parsedText);
     setParsedPdfText(parsedText);
+    form.setValue("pdfFile", parsedText); // Set the pdfFile field with parsed text
   };
 
-  const onSubmit = async (values: z.infer<typeof formValidator>) => {
+  const onSubmit = async (values: z.infer<typeof schema>) => {
     console.log("onSubmit called with values:", values);
 
     if (!parsedPdfText) {
@@ -56,19 +68,10 @@ const MultiPageForm = () => {
     console.log("Parsed PDF Text:", parsedPdfText);
 
     try {
-      const formData = new FormData();
-      formData.append("pdfFile", parsedPdfText);
-      formData.append("title", values.title);
-      formData.append("requirements", values.requirements);
-
-      formData.forEach((value, key) => {
-        console.log(key, value);
-      });
-
-      const response = await axios.post("/api/chatgpt", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+      const response = await axios.post("/api/chatgpt", {
+        pdfFile: values.pdfFile,
+        title: values.title,
+        requirements: values.requirements,
       });
 
       console.log("Response:", response);
@@ -91,7 +94,6 @@ const MultiPageForm = () => {
 
       console.log("Response data:", response.data);
       form.reset();
-      router.push("/letter");
     } catch (error) {
       console.error("Error:", error);
       return toast({
@@ -110,7 +112,12 @@ const MultiPageForm = () => {
             <FormField
               control={form.control}
               name="pdfFile"
-              render={() => <UploadDropzone onFileUpload={handleFileupload} />}
+              render={() => (
+                <FormItem>
+                  <UploadDropzone onFileUpload={handleFileUpload} />
+                  <FormMessage />
+                </FormItem>
+              )}
             />
           </div>
           <div className="w-1/2">
@@ -127,6 +134,7 @@ const MultiPageForm = () => {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
                 </FormItem>
               )}
             />

@@ -2,20 +2,16 @@
 import { ReactElement, useState } from "react";
 import { z } from "zod";
 
-export const formValidator = z.object({
-  // Enter job title
-  // Paste or type the title of the job you're applying for.
-
-  // Add job details
-  // Paste or type the responsibilities and requirements listed in the job description.
-  // RESPONSIBILITIES - some ponits
-  // MIniMUM Qualifications
-
-  pdfFile: z.string().url({ message: "PDF file URL is required" }),
-  title: z.string().min(1, { message: "Add the title or position" }),
-  requirements: z.string().min(1, {
-    message: "Paste or type the requirements listed in the job description",
-  }),
-});
+export const formValidator = z
+  .object({
+    title: z
+      .string()
+      .min(5, { message: "Title must be at least 5 characters" }),
+    requirements: z
+      .string()
+      .min(10, { message: "Requirements must be at least 10 characters" }),
+    pdfFile: z.string().nonempty({ message: "PDF file is required" }),
+  })
+  .required();
 
 export type FormCreationPayload = z.infer<typeof formValidator>;
