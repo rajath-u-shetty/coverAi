@@ -47,6 +47,7 @@
     "react-dropzone": "^14.2.3",
     "react-element-to-jsx-string": "^15.0.0",
     "react-hook-form": "^7.51.3",
+    "react-quill": "^2.0.0",
     "tailwind-merge": "^2.3.0",
     "tailwindcss-animate": "^1.0.7",
     "uploadthing": "^6.7.0",

@@ -15,17 +15,22 @@ import axios from "axios";
 import UploadDropzone from "./UploadDropzone";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
-import React, { useState } from "react";
 import { useToast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 import { formValidator } from "@/lib/formSchema";
 import IconAnimation from "./IconAnimation";
 import { Separator } from "./ui/separator";
+import React, { useState, useRef } from "react";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 const MultiPageForm = () => {
   const [parsedPdfText, setParsedPdfText] = useState<string | null>(null);
-  const [formSubmitted, setFormSubmitted] = useState(true);
+  const [formNotSubmitted, setFormNotSubmitted] = useState(true);
   const { toast } = useToast();
+
+  const [value, setValue] = useState("");
+  const quillRef = useRef<ReactQuill | null>(null);
 
   const form = useForm<z.infer<typeof formValidator>>({
     resolver: zodResolver(formValidator),
@@ -59,37 +64,53 @@ const MultiPageForm = () => {
     console.log("Parsed PDF Text:", parsedPdfText);
 
     try {
-      const response = await axios.post("/api/chatgpt", {
-        pdfFile: values.pdfFile,
-        title: values.title,
-        requirements: values.requirements,
+      const response = await fetch("/api/chatgpt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          pdfFile: values.pdfFile,
+          title: values.title,
+          requirements: values.requirements,
+        }),
       });
 
-      console.log("Response:", response);
-
-      if (response.status !== 200) {
-        return toast({
+      if (!response.ok) {
+        toast({
           title: "Something went wrong",
           description: "Please try again later @multipageform",
           variant: "destructive",
         });
+        return;
       }
 
-      if (!response.data) {
-        return toast({
-          title: "No response from chatgpt",
+      if (!response.body) {
+        toast({
+          title: "Something went wrong",
           description: "Please try again later @multipageform",
           variant: "destructive",
         });
+        return;
       }
 
-      console.log("Response data:", response.data);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
 
-      setFormSubmitted(false);
+      let done = false;
+      while (!done) {
+        const { value: chunk, done: readerDone } = await reader.read();
+        done = readerDone;
+        const text = decoder.decode(chunk);
+
+        setValue((prevValue) => prevValue + text);
+      }
+
+      setFormNotSubmitted(false);
       form.reset();
     } catch (error) {
       console.error("Error:", error);
-      return toast({
+      toast({
         title: "Something went wrong",
         description: "Please try again later @multipageform",
         variant: "destructive",
@@ -101,9 +122,9 @@ const MultiPageForm = () => {
     <div className="flex items-center justify-center h-screen w-full">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="border md:min-w-[900px]  border-slate-900 outline outline-1  rounded-lg p-10 max-w-96">
-            <div className="h-36 border-white flex flex-col  gap-4  ">
-              <h2 className="items-center  text-4xl font-bold bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500 bg-clip-text text-transparent ">
+          <div className="border md:min-w-[900px] border-slate-900 outline outline-1 rounded-lg p-10 max-w-96">
+            <div className="h-36 border-white flex flex-col gap-4">
+              <h2 className="items-center text-4xl font-bold bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500 bg-clip-text text-transparent">
                 Cover Letter Generator
               </h2>
               <p className="text-md text-wrap">
@@ -113,7 +134,8 @@ const MultiPageForm = () => {
               </p>
             </div>
             <Separator className="mx-0" />
-            {formSubmitted ? (
+
+            {formNotSubmitted ? (
               <div className="flex justify-center items-center gap-7 mt-5">
                 <div className="w-1/2 h-max">
                   <FormField
@@ -170,14 +192,21 @@ const MultiPageForm = () => {
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="w-full -mt-1"
+                    className="w-full -mt-1 font-bold bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-500 hover:bg-gradient-to-r hover:from-indigo-600 hover:via-sky-600 hover:to-cyan-500 ease-in-out"
                   >
                     Submit
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="flex items-center justify-center h-screen w-full"></div>
+              <div className="flex items-center justify-center h-screen w-full">
+                <ReactQuill
+                  theme="snow"
+                  value={value}
+                  onChange={setValue}
+                  ref={quillRef}
+                />
+              </div>
             )}
           </div>
         </form>
