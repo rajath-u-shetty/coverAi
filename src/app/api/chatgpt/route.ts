@@ -33,6 +33,8 @@ export async function POST(req: NextRequest) {
           const text = chunk.choices[0].delta?.content || "";
           controller.enqueue(`data: ${text}\n\n`);
         }
+
+        console.log("Stream completed");
         controller.close();
       } catch (error) {
         console.error("Error in /api/chatgpt:", error);
