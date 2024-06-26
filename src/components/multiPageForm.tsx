@@ -11,7 +11,6 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-import axios from "axios";
 import UploadDropzone from "./UploadDropzone";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
@@ -23,6 +22,14 @@ import { Separator } from "./ui/separator";
 import React, { useState, useRef } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTrigger,
+} from "./ui/dialog";
+import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
 
 const MultiPageForm = () => {
   const [parsedPdfText, setParsedPdfText] = useState<string | null>(null);
@@ -30,7 +37,7 @@ const MultiPageForm = () => {
   const { toast } = useToast();
 
   const [value, setValue] = useState("");
-  const quillRef = useRef<ReactQuill | null>(null);
+  // const quillRef = useRef<ReactQuill | null>(null);
 
   const form = useForm<z.infer<typeof formValidator>>({
     resolver: zodResolver(formValidator),
@@ -63,6 +70,7 @@ const MultiPageForm = () => {
 
     console.log("Parsed PDF Text:", parsedPdfText);
 
+    setFormNotSubmitted(false);
     try {
       const response = await fetch("/api/chatgpt", {
         method: "POST",
@@ -70,43 +78,37 @@ const MultiPageForm = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          pdfFile: values.pdfFile,
           title: values.title,
           requirements: values.requirements,
+          pdfFile: values.pdfFile,
         }),
       });
 
       if (!response.ok) {
-        toast({
-          title: "Something went wrong",
-          description: "Please try again later @multipageform",
-          variant: "destructive",
-        });
-        return;
+        throw new Error("Network response was not ok");
       }
 
       if (!response.body) {
-        toast({
-          title: "Something went wrong",
-          description: "Please try again later @multipageform",
-          variant: "destructive",
-        });
-        return;
+        throw new Error("Response has no body");
       }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
+      let finalText = "";
 
-      let done = false;
-      while (!done) {
-        const { value: chunk, done: readerDone } = await reader.read();
-        done = readerDone;
-        const text = decoder.decode(chunk);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        console.log(chunk); // Process each chunk as it arrives
+        finalText += chunk;
 
-        setValue((prevValue) => prevValue + text);
+        // Update ReactQuill editor content
+        // quillRef.current?.getEditor().clipboard.dangerouslyPasteHTML(finalText);
       }
 
-      setFormNotSubmitted(false);
+      console.log("Final text:", finalText);
+
       form.reset();
     } catch (error) {
       console.error("Error:", error);
@@ -119,23 +121,24 @@ const MultiPageForm = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen w-full">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)}>
-          <div className="border md:min-w-[900px] border-slate-900 outline outline-1 rounded-lg p-10 max-w-96">
-            <div className="h-36 border-white flex flex-col gap-4">
-              <h2 className="items-center text-4xl font-bold bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500 bg-clip-text text-transparent">
-                Cover Letter Generator
-              </h2>
-              <p className="text-md text-wrap">
-                Speed up the job application process with Grammarly’s AI-powered
-                cover letter generator, which helps you create a standout cover
-                letter in three quick steps.
-              </p>
-            </div>
-            <Separator className="mx-0" />
+    <Dialog>
+      {" "}
+      <div className="flex items-center justify-center h-screen w-full">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)}>
+            <div className="border md:min-w-[900px] border-slate-900 outline outline-1 rounded-lg p-10 max-w-96">
+              <div className="h-36 border-white flex flex-col gap-4">
+                <h2 className="items-center text-4xl font-bold bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500 bg-clip-text text-transparent">
+                  Cover Letter Generator
+                </h2>
+                <p className="text-md text-wrap">
+                  Speed up the job application process with Grammarly’s
+                  AI-powered cover letter generator, which helps you create a
+                  standout cover letter in three quick steps.
+                </p>
+              </div>
+              <Separator className="mx-0" />
 
-            {formNotSubmitted ? (
               <div className="flex justify-center items-center gap-7 mt-5">
                 <div className="w-1/2 h-max">
                   <FormField
@@ -188,30 +191,35 @@ const MultiPageForm = () => {
                       </FormItem>
                     )}
                   />
-
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full -mt-1 font-bold bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-500 hover:bg-gradient-to-r hover:from-indigo-600 hover:via-sky-600 hover:to-cyan-500 ease-in-out"
-                  >
-                    Submit
-                  </Button>
+                  <DialogTrigger asChild>
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full -mt-1 font-bold bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-500 hover:bg-gradient-to-r hover:from-indigo-600 hover:via-sky-600 hover:to-cyan-500 ease-in-out"
+                    >
+                      Submit
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    a
+                    <DialogHeader>
+                      <DialogTitle>Are you absolutely sure?</DialogTitle>
+                      <DialogDescription>
+                        This action cannot be undone. Are you sure you want to
+                        permanently delete this file from our servers?
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <Button type="submit">Confirm</Button>
+                    </DialogFooter>
+                  </DialogContent>
                 </div>
               </div>
-            ) : (
-              <div className="flex items-center justify-center h-screen w-full">
-                <ReactQuill
-                  theme="snow"
-                  value={value}
-                  onChange={setValue}
-                  ref={quillRef}
-                />
-              </div>
-            )}
-          </div>
-        </form>
-      </Form>
-    </div>
+            </div>
+          </form>
+        </Form>
+      </div>
+    </Dialog>
   );
 };
 
