@@ -19,25 +19,25 @@ import { useRouter } from "next/navigation";
 import { formValidator } from "@/lib/formSchema";
 import IconAnimation from "./IconAnimation";
 import { Separator } from "./ui/separator";
-import React, { useState, useRef } from "react";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "./ui/dialog";
-import { DialogDescription, DialogTitle } from "@radix-ui/react-dialog";
+import { Copy } from "lucide-react";
 
 const MultiPageForm = () => {
   const [parsedPdfText, setParsedPdfText] = useState<string | null>(null);
-  const [formNotSubmitted, setFormNotSubmitted] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dialogContent, setDialogContent] = useState("");
   const { toast } = useToast();
 
-  const [value, setValue] = useState("");
-  // const quillRef = useRef<ReactQuill | null>(null);
+  let finalText = "";
 
   const form = useForm<z.infer<typeof formValidator>>({
     resolver: zodResolver(formValidator),
@@ -53,7 +53,7 @@ const MultiPageForm = () => {
   const handleFileUpload = (parsedText: string) => {
     console.log("File uploaded:", parsedText);
     setParsedPdfText(parsedText);
-    form.setValue("pdfFile", parsedText); // Set the pdfFile field with parsed text
+    form.setValue("pdfFile", parsedText);
   };
 
   const onSubmit = async (values: z.infer<typeof formValidator>) => {
@@ -70,7 +70,9 @@ const MultiPageForm = () => {
 
     console.log("Parsed PDF Text:", parsedPdfText);
 
-    setFormNotSubmitted(false);
+    setDialogOpen(true);
+    setDialogContent("");
+
     try {
       const response = await fetch("/api/chatgpt", {
         method: "POST",
@@ -94,21 +96,19 @@ const MultiPageForm = () => {
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let finalText = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
         const chunk = decoder.decode(value);
-        console.log(chunk); // Process each chunk as it arrives
+        console.log(chunk);
         finalText += chunk;
-
-        // Update ReactQuill editor content
-        // quillRef.current?.getEditor().clipboard.dangerouslyPasteHTML(finalText);
+        setDialogContent((prevContent) => prevContent + chunk);
       }
 
-      console.log("Final text:", finalText);
+      // console.log(finalText);
 
+      // setDialogContent(finalText);
       form.reset();
     } catch (error) {
       console.error("Error:", error);
@@ -120,9 +120,38 @@ const MultiPageForm = () => {
     }
   };
 
+  const formatDialogContent = (text: string) => {
+    const paragraphs = text
+      .split("\n")
+      .filter((paragraph) => paragraph.trim() !== "");
+    return paragraphs.map((paragraph, index) => (
+      <p key={index} className="my-2">
+        {paragraph}
+      </p>
+    ));
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard
+      .writeText(dialogContent)
+      .then(() => {
+        toast({
+          title: "Copied to clipboard",
+          description: "The content has been copied to your clipboard.",
+        });
+      })
+      .catch((err) => {
+        console.error("Failed to copy: ", err);
+        toast({
+          title: "Failed to copy",
+          description: "An error occurred while copying the content.",
+          variant: "destructive",
+        });
+      });
+  };
+
   return (
-    <Dialog>
-      {" "}
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <div className="flex items-center justify-center h-screen w-full">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -191,34 +220,35 @@ const MultiPageForm = () => {
                       </FormItem>
                     )}
                   />
-                  <DialogTrigger asChild>
-                    <Button
-                      type="submit"
-                      disabled={isLoading}
-                      className="w-full -mt-1 font-bold bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-500 hover:bg-gradient-to-r hover:from-indigo-600 hover:via-sky-600 hover:to-cyan-500 ease-in-out"
-                    >
-                      Submit
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    a
-                    <DialogHeader>
-                      <DialogTitle>Are you absolutely sure?</DialogTitle>
-                      <DialogDescription>
-                        This action cannot be undone. Are you sure you want to
-                        permanently delete this file from our servers?
-                      </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter>
-                      <Button type="submit">Confirm</Button>
-                    </DialogFooter>
-                  </DialogContent>
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="w-full -mt-1 font-bold bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-500 hover:bg-gradient-to-r hover:from-indigo-600 hover:via-sky-600 hover:to-cyan-500 ease-in-out"
+                  >
+                    Submit
+                  </Button>
                 </div>
               </div>
             </div>
           </form>
         </Form>
       </div>
+      <DialogContent className="min-h-[500px] w-full max-w-72 md:min-w-[800px]">
+        <DialogHeader>
+          <DialogTitle className="flex justify-between my-10">
+            <p
+              className="text-3xl font-bold bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500
+              bg-clip-text text-transparent"
+            >
+              Generating...
+            </p>
+            <Copy className="h-6 w-6" onClick={copyToClipboard} />
+          </DialogTitle>
+        </DialogHeader>
+        <DialogDescription className="mx-5 max-h-[400px] overflow-auto">
+          {formatDialogContent(dialogContent)}
+        </DialogDescription>
+      </DialogContent>
     </Dialog>
   );
 };
