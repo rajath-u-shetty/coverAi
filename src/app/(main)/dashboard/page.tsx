@@ -1,4 +1,6 @@
 import { ModeToggle } from "@/components/ModeToggle";
+import UserAuthForm from "@/components/UserAuthForm";
+import UserDropdown from "@/components/UserDropDown";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -9,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { getAuthSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { FileTerminal, History } from "lucide-react";
 import Link from "next/link";
@@ -41,6 +44,7 @@ const page = () => {
           <div className="flex justify-between items-center">
             <h1 className="text-3xl">DashBoard</h1>
             <ModeToggle />
+            // <UserDropdown />
           </div>
           <Separator className="my-3" />
         </div>

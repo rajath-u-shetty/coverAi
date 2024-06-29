@@ -7,6 +7,7 @@ import { Progress } from "./ui/progress";
 import { useToast } from "./ui/use-toast";
 import { useUploadThing } from "@/lib/uploadthing";
 import axios from "axios";
+import { getFile } from "@/actions/file";
 
 const UploadDropzone = ({ onFileUpload }: any) => {
   const [isUploading, setIsUploading] = useState(false);
@@ -61,8 +62,11 @@ const UploadDropzone = ({ onFileUpload }: any) => {
           });
         }
 
+        console.log(res);
+
         const [fileResponse] = res;
         const key = fileResponse?.key;
+        console.log("fileresponse", fileResponse);
 
         if (!key) {
           clearInterval(progressInterval);
@@ -74,6 +78,19 @@ const UploadDropzone = ({ onFileUpload }: any) => {
             variant: "destructive",
           });
         }
+
+        const file = await getFile(fileResponse.key);
+
+        if (!file.id) {
+          return toast({
+            title: "file not found",
+            description: "file not found @dropzone",
+            variant: "destructive",
+          });
+        }
+
+        console.log("fileId", file.id);
+        const fileId = file.id;
 
         try {
           const formData = new FormData();
@@ -96,7 +113,8 @@ const UploadDropzone = ({ onFileUpload }: any) => {
             clearInterval(progressInterval);
             setUploadProgress(100);
             // console.log(response);
-            onFileUpload(response.data);
+
+            onFileUpload(response.data, fileId);
           }
 
           // console.log(response.data);

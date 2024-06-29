@@ -30,11 +30,13 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Copy } from "lucide-react";
+import { letterContent } from "@/actions/file";
 
 const MultiPageForm = () => {
   const [parsedPdfText, setParsedPdfText] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState("");
+  const [fileId, setFileId] = useState<string | null>("");
   const { toast } = useToast();
 
   let finalText = "";
@@ -50,14 +52,16 @@ const MultiPageForm = () => {
 
   const isLoading = form.formState.isSubmitting;
 
-  const handleFileUpload = (parsedText: string) => {
-    console.log("File uploaded:", parsedText);
+  const handleFileUpload = (parsedText: string, fileId: string) => {
+    // console.log("File uploaded:", parsedText);
+    // console.log("File ID:", fileId);
+    setFileId(fileId);
     setParsedPdfText(parsedText);
     form.setValue("pdfFile", parsedText);
   };
 
   const onSubmit = async (values: z.infer<typeof formValidator>) => {
-    console.log("onSubmit called with values:", values);
+    // console.log("onSubmit called with values:", values);
 
     if (!parsedPdfText) {
       toast({
@@ -68,7 +72,7 @@ const MultiPageForm = () => {
       return;
     }
 
-    console.log("Parsed PDF Text:", parsedPdfText);
+    // console.log("Parsed PDF Text:", parsedPdfText);
 
     setDialogOpen(true);
     setDialogContent("");
@@ -109,6 +113,19 @@ const MultiPageForm = () => {
       // console.log(finalText);
 
       // setDialogContent(finalText);
+      // const formattedText = formatDialogContent(dialogContent);
+
+      if (!fileId) {
+        toast({
+          title: "Something went wrong",
+          description: "Please try again later @multipageform",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      await letterContent(fileId, finalText);
+
       form.reset();
     } catch (error) {
       console.error("Error:", error);

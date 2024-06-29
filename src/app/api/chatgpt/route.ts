@@ -7,7 +7,7 @@ const openai = new OpenAI({
 
 export async function POST(req: NextRequest) {
   const { title, requirements, pdfFile } = await req.json();
-  console.log("in CHATGPT route.ts", pdfFile);
+  // console.log("in CHATGPT route.ts", pdfFile);
 
   if (!title || !requirements || !pdfFile) {
     return new NextResponse("Missing required fields", { status: 400 });
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
         async start(controller) {
           for await (const chunk of response) {
             const text = chunk.choices[0].delta?.content || "";
-            console.log(text);
+            // console.log(text);
             controller.enqueue(text);
           }
           controller.close();
