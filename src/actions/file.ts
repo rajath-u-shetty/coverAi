@@ -24,21 +24,37 @@ export const getFile = async (input: any) => {
   return file;
 };
 
-export const letterContent = async (fieldId: string, content: string) => {
+export const letterContent = async (fileId: string, content: string) => {
   const session = await getAuthSession();
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
-  const userId = session.user.id;
+  const userId = session?.user.id;
+  console.log(session);
 
-  const coverLetter = await db.coverLetter.create({
-    data: {
-      content,
-      resumeId: fieldId,
-      userId: userId, // Use userId directly instead of user object
+  const existingCoverLetter = await db.coverLetter.findFirst({
+    where: {
+      resumeId: fileId,
+      userId: userId,
     },
   });
 
-  if (!coverLetter) throw new Error("Failed to create cover letter");
-  return coverLetter;
+  if (existingCoverLetter) {
+    throw new Error("Cover Letter for this already exists");
+  }
+  try {
+    const newCoverLetter = await db.coverLetter.create({
+      data: {
+        userId: userId,
+        resumeId: fileId,
+        content: content,
+      },
+    });
+
+    if (!newCoverLetter) throw new Error("Failed to create cover letter");
+
+    return newCoverLetter;
+  } catch (error) {
+    throw new Error("Failed to create cover letter");
+  }
 };
