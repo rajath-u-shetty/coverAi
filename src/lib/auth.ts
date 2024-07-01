@@ -1,46 +1,56 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { NextAuthOptions, getServerSession } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
 import { db } from "./db";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions: NextAuthOptions = {
-    adapter: PrismaAdapter(db),
-    session: {
-        strategy: "database"
+  adapter: PrismaAdapter(db),
+  session: {
+    strategy: "jwt",
+  },
+  pages: {
+    signIn: "/sign-in",
+  },
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
+  ],
+  callbacks: {
+    async session({ token, session }) {
+      if (token) {
+        session.user.id = token.id;
+        session.user.name = token.name;
+        session.user.email = token.email;
+        session.user.image = token.picture;
+      }
+
+      return session;
     },
-    providers: [
-        GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID!,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-        }),
-        // GitHubProvider({
-        //     clientId: process.env.GITHUB_ID!,
-        //     clientSecret: process.env.GITHUB_SECRET!
-        // })
-    ],
-    callbacks: {
-        async session({token, session}){
-            if(token){
-                session.user.id = token.id
-                session.user.name = token.name
-                session.user.email = token.email
-                session.user.image = token.picture
-            }
-            return session
+    async jwt({ token, user }) {
+      const dbUser = await db.user.findFirst({
+        where: {
+          email: token.email!,
         },
-        async jwt({token, user}){
-            if(user){
-                token.id = user.id
-                token.email = user.email
-                token.name = user.name
-                token.picture = user.image
-            }
-            return token;
-        },
-        redirect(){
-            return "/dashboard"
-        }
-    }
-}
+      });
+
+      if (!dbUser) {
+        token.id = user!.id;
+        return token;
+      }
+
+      return {
+        id: dbUser.id,
+        name: dbUser.name,
+        email: dbUser.email,
+        picture: dbUser.image,
+      };
+    },
+    redirect() {
+      return "/dashboard";
+    },
+  },
+};
 
 export const getAuthSession = () => getServerSession(authOptions);

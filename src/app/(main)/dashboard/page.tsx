@@ -44,7 +44,6 @@ const page = () => {
           <div className="flex justify-between items-center">
             <h1 className="text-3xl">DashBoard</h1>
             <ModeToggle />
-            // <UserDropdown />
           </div>
           <Separator className="my-3" />
         </div>

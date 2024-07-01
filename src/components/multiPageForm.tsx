@@ -15,19 +15,15 @@ import UploadDropzone from "./UploadDropzone";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { useRouter } from "next/navigation";
 import { formValidator } from "@/lib/formSchema";
-import IconAnimation from "./IconAnimation";
 import { Separator } from "./ui/separator";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "./ui/dialog";
 import { Copy } from "lucide-react";
 import { letterContent } from "@/actions/file";

@@ -12,7 +12,7 @@ const handleAuth = async () => {
   if (!session?.user) {
     throw new UploadThingError("UnAuthorized");
   }
-  return { userId: session.user.id };
+  return { userId: session?.user.id };
 };
 
 export const ourFileRouter = {
