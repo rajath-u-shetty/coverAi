@@ -1,8 +1,9 @@
 import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
+import { deleteValidator } from "@/lib/validator";
 import { NextRequest } from "next/server";
 
-export async function GET(req: Request) {
+export async function GET() {
   const session = await getAuthSession();
   if (!session?.user) {
     return new Response("Unauthorized", { status: 401 });
@@ -11,24 +12,25 @@ export async function GET(req: Request) {
   const userId = session?.user.id;
 
   if (!userId) throw new Error("Unauthorized");
+  try {
+    const coverLetter = await db.coverLetter.findMany({
+      where: {
+        userId: userId,
+      },
+    });
 
-  const coverLetter = await db.coverLetter.findMany({
-    where: {
-      userId: userId,
-    },
-  });
+    if (!coverLetter) throw new Error("Cover Letter not found");
 
-  if (!coverLetter) throw new Error("Cover Letter not found");
-
-  return new Response(JSON.stringify(coverLetter), {
-    status: 200,
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+    return new Response(JSON.stringify(coverLetter), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+  } catch (error) {}
 }
 
-export async function POST(req: NextRequest) {
+export async function PATCH(req: NextRequest) {
   const session = await getAuthSession();
   if (!session?.user) {
     return new Response("Unauthorized", { status: 401 });
@@ -38,25 +40,31 @@ export async function POST(req: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const { fileId } = req.json();
+  try {
+    const body = await req.json();
+    const { fileId } = deleteValidator.parse(body);
 
-  const userId = session?.user.id;
-  const coverLetter = await db.coverLetter.findFirst({
-    where: {
-      userId: userId,
-      id: fileId,
-    },
-  });
+    const userId = session?.user.id;
+    const coverLetter = await db.coverLetter.findFirst({
+      where: {
+        userId: userId,
+        id: fileId,
+      },
+    });
 
-  if (!coverLetter) {
-    return new Response("Cover Letter not found", { status: 404 });
+    if (!coverLetter) {
+      return new Response("Cover Letter not found", { status: 404 });
+    }
+
+    await db.coverLetter.delete({
+      where: {
+        id: fileId,
+      },
+    });
+
+    return new Response("Cover Letter deleted", { status: 200 });
+  } catch (error) {
+    console.error("Error deleting cover letter:", error);
+    return new Response("Error deleting cover letter", { status: 500 });
   }
-
-  await db.coverLetter.delete({
-    where: {
-      id: fileId,
-    },
-  });
-
-  return new Response("Cover Letter deleted", { status: 200 });
 }

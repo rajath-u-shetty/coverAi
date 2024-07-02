@@ -15,3 +15,9 @@ export const formValidator = z
   .required();
 
 export type FormCreationPayload = z.infer<typeof formValidator>;
+
+export const deleteValidator = z.object({
+  fileId: z.string().nonempty({ message: "File ID is required" }),
+});
+
+export type DeletePayload = z.infer<typeof deleteValidator>;

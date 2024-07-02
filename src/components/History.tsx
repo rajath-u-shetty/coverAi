@@ -1,13 +1,39 @@
+"use client";
 import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Skeleton } from "./ui/skeleton";
 import { format } from "date-fns";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getCoverLetter } from "@/actions/file";
-import { useToast } from "./ui/use-toast";
+import axios from "axios";
+import { DeletePayload } from "@/lib/validator";
 
-export const History = async () => {
+export const History = () => {
+  const { data: coverLetter, isLoading } = useQuery({
+    queryKey: ["coverLetter"],
+    queryFn: async () => {
+      const { data } = await axios.get("/api/history");
+      return data;
+    },
+  });
+
+  const { mutate: deleteFile, isLoading: currentlyDeletingFile } = useMutation({
+    mutationKey: ["deleteFile"],
+    mutationFn: async (id: string) => {
+      const payload: DeletePayload = {
+        fileId: id,
+      };
+
+      await axios.patch(`/api/history`, payload);
+    },
+    onError: (error) => {
+      console.error("Error deleting file:", error);
+      // Optionally, add your toast notification here
+    },
+    onSuccess: () => {
+      // Optionally, add your success toast notification here
+    },
+  });
+
   return (
     <div>
       <div className="flex flex-col items-center justify-center">
@@ -18,7 +44,7 @@ export const History = async () => {
         <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
           {coverLetter
             .sort(
-              (a, b) =>
+              (a: any, b: any) =>
                 new Date(b.createdAt).getTime() -
                 new Date(a.createdAt).getTime(),
             )
@@ -55,12 +81,12 @@ export const History = async () => {
                   </div>
 
                   <Button
-                    onClick={() => deleteFile({ id: letter.id })}
+                    onClick={() => deleteFile(letter.id)}
                     size="sm"
                     className="w-full"
                     variant="destructive"
                   >
-                    {currentlyDeletingFile === letter.id ? (
+                    {currentlyDeletingFile ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       <Trash className="h-4 w-4 text-red-500" />
@@ -71,12 +97,13 @@ export const History = async () => {
             ))}
         </ul>
       ) : isLoading ? (
-        <Skeleton height={100} className="my-2" count={3} />
+        // <Skeleton height={100} className="my-2" count={3} />
+        <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <div className="mt-16 flex flex-col items-center gap-2">
           <Ghost className="h-8 w-8 text-zinc-800" />
           <h3 className="font-semibold text-xl">Pretty empty around here</h3>
-          <p>Let&apos;s upload your first PDF.</p>
+          <p>Let's upload your first PDF.</p>
         </div>
       )}
     </div>

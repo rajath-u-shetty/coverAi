@@ -15,7 +15,6 @@ import UploadDropzone from "./UploadDropzone";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
-import { formValidator } from "@/lib/formSchema";
 import { Separator } from "./ui/separator";
 import React, { useState } from "react";
 import {
@@ -27,6 +26,7 @@ import {
 } from "./ui/dialog";
 import { Copy } from "lucide-react";
 import { letterContent } from "@/actions/file";
+import { formValidator } from "@/lib/validator";
 
 const MultiPageForm = () => {
   const [parsedPdfText, setParsedPdfText] = useState<string | null>(null);
