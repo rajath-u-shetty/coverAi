@@ -47,27 +47,30 @@ model User {
 }
 
 model File {
-  id           String        @id @default(cuid())
-  name         String
-  uploadStatus UploadStatus  @default(PENDING)
-  url          String
-  key          String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  userId       String?
-  CoverLetter  CoverLetter[]
-  User         User?         @relation(fields: [userId], references: [id])
+  id                       String        @id @default(cuid())
+  name                     String        @unique
+  uploadStatus             UploadStatus  @default(PENDING)
+  url                      String
+  key                      String
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
+  userId                   String?
+  coverLettersAsAttachment CoverLetter[] @relation("AttachmentFile")
+  coverLettersAsResume     CoverLetter[] @relation("ResumeFile")
+  user                     User?         @relation(fields: [userId], references: [id])
 }
 
 model CoverLetter {
-  id         String   @id @default(cuid())
-  content    String
-  createdAt  DateTime @default(now())
-  updattedAt DateTime @updatedAt
-  userId     String
-  resumeId   String
-  file       File     @relation(fields: [resumeId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  userId    String
+  resumeId  String
+  fileName  String
+  updatedAt DateTime @updatedAt
+  file      File     @relation("AttachmentFile", fields: [fileName], references: [name], onDelete: Cascade)
+  resume    File     @relation("ResumeFile", fields: [resumeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Generation {

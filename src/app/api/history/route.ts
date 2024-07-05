@@ -2,6 +2,7 @@ import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { deleteValidator } from "@/lib/validator";
 import { NextRequest } from "next/server";
+import { z } from "zod";
 
 export async function GET() {
   const session = await getAuthSession();
@@ -27,7 +28,7 @@ export async function GET() {
         "Content-Type": "application/json",
       },
     });
-  } catch (error) {}
+  } catch (error) { }
 }
 
 export async function PATCH(req: NextRequest) {
@@ -59,12 +60,12 @@ export async function PATCH(req: NextRequest) {
     await db.coverLetter.delete({
       where: {
         id: fileId,
+        userId: userId,
       },
     });
 
     return new Response("Cover Letter deleted", { status: 200 });
   } catch (error) {
     console.error("Error deleting cover letter:", error);
-    return new Response("Error deleting cover letter", { status: 500 });
   }
-}
+}  

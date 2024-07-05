@@ -25,7 +25,7 @@ export const getFile = async (input: any) => {
   return file;
 };
 
-export const letterContent = async (fileId: string, content: string) => {
+export const letterContent = async (fileId: string, content: string, fileName: string) => {
   const session = await getAuthSession();
   if (!session?.user) {
     throw new Error("Unauthorized");
@@ -52,6 +52,7 @@ export const letterContent = async (fileId: string, content: string) => {
         userId: userId,
         resumeId: fileId,
         content: content,
+        fileName: fileName
       },
     });
 

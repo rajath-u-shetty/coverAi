@@ -1,5 +1,3 @@
-"use client";
-import { ReactElement, useState } from "react";
 import { z } from "zod";
 
 export const formValidator = z
@@ -17,7 +15,7 @@ export const formValidator = z
 export type FormCreationPayload = z.infer<typeof formValidator>;
 
 export const deleteValidator = z.object({
-  fileId: z.string().nonempty({ message: "File ID is required" }),
+  fileId: z.string({ message: "File ID is required" }),
 });
 
 export type DeletePayload = z.infer<typeof deleteValidator>;

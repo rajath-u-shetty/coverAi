@@ -33,6 +33,7 @@ const MultiPageForm = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState("");
   const [fileId, setFileId] = useState<string | null>("");
+  const [fileName, setFileName] = useState<string | null>(""); 
   const { toast } = useToast();
 
   let finalText = "";
@@ -48,11 +49,12 @@ const MultiPageForm = () => {
 
   const isLoading = form.formState.isSubmitting;
 
-  const handleFileUpload = (parsedText: string, fileId: string) => {
+  const handleFileUpload = (parsedText: string, fileId: string, fileName: string) => { 
     // console.log("File uploaded:", parsedText);
     // console.log("File ID:", fileId);
     setFileId(fileId);
     setParsedPdfText(parsedText);
+    setFileName(fileName); 
     form.setValue("pdfFile", parsedText);
   };
 
@@ -120,7 +122,7 @@ const MultiPageForm = () => {
         return;
       }
 
-      await letterContent(fileId, finalText);
+      await letterContent(fileId, finalText, fileName); 
 
       form.reset();
     } catch (error) {

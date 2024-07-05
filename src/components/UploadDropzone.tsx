@@ -114,7 +114,7 @@ const UploadDropzone = ({ onFileUpload }: any) => {
             setUploadProgress(100);
             // console.log(response);
 
-            onFileUpload(response.data, fileId);
+            onFileUpload(response.data, fileId, file.name);
           }
 
           // console.log(response.data);
