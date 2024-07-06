@@ -65,7 +65,8 @@ export async function PATCH(req: NextRequest) {
     });
 
     return new Response("Cover Letter deleted", { status: 200 });
-  } catch (error) {
-    console.error("Error deleting cover letter:", error);
+  } catch (error: any) {
+    console.error("Error deleting cover letter:", error.message);
+    return new Response(error.message, { status: 400 });
   }
 }  

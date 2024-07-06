@@ -23,6 +23,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         language: "bg-black text-zinc-100 hover:bg-zinc-800 dark:bg-white dark:text-black",
         white: "bg-white text-black hover:bg-white/90",
+        destructive2: 'text-white hover:bg-red-300 dark:hover:bg-red-300',
       },
       size: {
         default: 'h-10 py-2 px-4',

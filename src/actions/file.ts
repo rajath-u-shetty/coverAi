@@ -25,7 +25,7 @@ export const getFile = async (input: any) => {
   return file;
 };
 
-export const letterContent = async (fileId: string, content: string, fileName: string) => {
+export const letterContent = async (fileId: string, content: string) => {
   const session = await getAuthSession();
   if (!session?.user) {
     throw new Error("Unauthorized");
@@ -46,16 +46,24 @@ export const letterContent = async (fileId: string, content: string, fileName: s
     throw new Error("Cover Letter for this already exists");
   }
 
+  const file = await db.file.findUnique({
+    where: {
+      userId: userId,
+      id: fileId
+    }
+  })
+
+  if(!file) throw new Error("File not foun");
+
   try {
     const newCoverLetter = await db.coverLetter.create({
       data: {
         userId: userId,
         resumeId: fileId,
         content: content,
-        fileName: fileName
+        fileName: file.name,
       },
     });
-
     if (!newCoverLetter) throw new Error("Failed to create cover letter");
 
     return newCoverLetter;
@@ -64,49 +72,4 @@ export const letterContent = async (fileId: string, content: string, fileName: s
   }
 };
 
-export const getCoverLetter = async () => {
-  const session = await getAuthSession();
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
 
-  const userId = session?.user.id;
-
-  if (!userId) throw new Error("Unauthorized");
-
-  const coverLetter = await db.coverLetter.findMany({
-    where: {
-      userId: userId,
-    },
-  });
-
-  if (!coverLetter) throw new Error("Cover Letter not found");
-
-  return coverLetter;
-};
-
-export const deleteFile = async (input: any) => {
-  const session = await getAuthSession();
-  if (!session?.user) {
-    throw new Error("Unauthorized");
-  }
-
-  const userId = session?.user.id;
-
-  if (!userId) throw new Error("Unauthorized");
-
-  const file = await db.file.findFirst({
-    where: {
-      userId,
-      key: input,
-    },
-  });
-
-  if (!file) throw new Error("File not found");
-
-  await db.file.delete({
-    where: {
-      id: file.id,
-    },
-  });
-};

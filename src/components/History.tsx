@@ -1,5 +1,5 @@
 "use client";
-import { Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
+import { Download, Edit, Ghost, Loader2, MessageSquare, Plus, Trash } from "lucide-react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import { format } from "date-fns";
@@ -9,10 +9,14 @@ import { DeletePayload } from "@/lib/validator";
 import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 import { CoverLetter } from "@prisma/client";
+import { useRef } from "react";
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 export const History = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const printRef = useRef(null);
 
   const { data: coverLetters, isLoading, error } = useQuery({
     queryKey: ["coverLetter"],
@@ -38,7 +42,6 @@ export const History = () => {
           });
         } else if (err.response?.status === 422) {
           return toast({
-            title: "Invalid name",
             description: "Please choose a name between 3 and 21 characters",
             variant: "destructive",
           });
@@ -62,8 +65,11 @@ export const History = () => {
     },
   });
 
+
   if (isLoading) {
-    return <Loader2 className="h-4 w-4 animate-spin" />;
+    return <div className="flex justify-center items-center h-screen">
+      <span className="loader" />
+    </div>;
   }
 
   if (error) {
@@ -77,11 +83,12 @@ export const History = () => {
   }
 
   return (
-    <div>
-      <div className="flex flex-col items-center justify-center">
-        <h1 className="text-3xl font-bold">History</h1>
+    <main className='mx-auto max-w-7xl md:p-10'>
+      <div className='mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0'>
+        <h1 className='mb-3 font-bold text-5xl bg-gradient-to-r from-indigo-500 via-sky-500 to-indigo-500 bg-clip-text text-transparent'>
+          History
+        </h1>
       </div>
-
       {coverLetters && coverLetters.length !== 0 ? (
         <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
           {coverLetters
@@ -100,23 +107,27 @@ export const History = () => {
                           {letter.fileName}
                         </h3>
                       </div>
+                      <p className="text-sm text-zinc-500">
+                        {format(new Date(letter.createdAt), "dd MMM yyyy hh:mm a")}
+                      </p>
                     </div>
                   </div>
                 </Link>
                 <div className="px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500">
-                  <div className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    {format(new Date(letter.createdAt), "MMM yyyy")}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" />
-                    mocked
-                  </div>
+                  <Link href={`/dashboard/${letter.id}`} className="flex items-center gap-2">
+                    <Edit className="h-4 w-4" />
+                    Edit
+                  </Link>
+                  <Link href={`/dashboard/${letter.id}`}
+                    className="flex items-center gap-2">
+                    <Download className="h-4 w-4" />
+                    Download
+                  </Link>
                   <Button
                     onClick={() => deleteFile(letter.id)}
                     size="sm"
                     className="w-full"
-                    variant="destructive"
+                    variant="destructive2"
                   >
                     {currentlyDeletingFile ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -135,7 +146,7 @@ export const History = () => {
           <p>Let's upload your first PDF.</p>
         </div>
       )}
-    </div>
+    </main>
   );
 };
 

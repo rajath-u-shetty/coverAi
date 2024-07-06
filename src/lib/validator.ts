@@ -19,3 +19,6 @@ export const deleteValidator = z.object({
 });
 
 export type DeletePayload = z.infer<typeof deleteValidator>;
+
+
+
