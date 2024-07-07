@@ -111,19 +111,22 @@ const MultiPageForm = () => {
       // setDialogContent(finalText);
       // const formattedText = formatDialogContent(dialogContent);
 
-      if (!fileId) {
-        toast({
-          title: "Something went wrong",
-          description: "Please try again later @multipageform",
-          variant: "destructive",
-        });
-        return;
-      }
+     const formattedContent = formatDialogContent(finalText);
+      console.log(formattedContent); 
 
-      
-      await letterContent(fileId, finalText); 
+      console.log(finalText); 
+    if (!fileId) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later @multipageform",
+        variant: "destructive",
+      });
+      return;
+    }
 
-      form.reset();
+    await letterContent(fileId, formattedContent); 
+
+    form.reset();
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -134,16 +137,26 @@ const MultiPageForm = () => {
     }
   };
 
-  const formatDialogContent = (text: string) => {
-    const paragraphs = text
-      .split("\n")
-      .filter((paragraph) => paragraph.trim() !== "");
-    return paragraphs.map((paragraph, index) => (
-      <p key={index} className="my-2">
-        {paragraph}
-      </p>
-    ));
-  };
+ const formatDialogContent = (text: string) => {
+  const paragraphs = text
+    .split("\n")
+    .filter((paragraph) => paragraph.trim() !== "")
+    .map((paragraph) => `<p class="my-2">${paragraph}</p>`);
+  return paragraphs.join("");
+};
+
+const formatTextForDisplay = (text: string) => {
+  const paragraphs = text
+    .split("\n")
+    .filter((paragraph) => paragraph.trim() !== "");
+  return paragraphs.map((paragraph, index) => (
+    <p key={index} className="my-2">
+      {paragraph}
+    </p>
+  ));
+};
+
+ 
 
   const copyToClipboard = () => {
     navigator.clipboard
@@ -260,7 +273,7 @@ const MultiPageForm = () => {
           </DialogTitle>
         </DialogHeader>
         <DialogDescription className="mx-5 max-h-[400px] overflow-auto">
-          {formatDialogContent(dialogContent)}
+          {formatTextForDisplay(dialogContent)}
         </DialogDescription>
       </DialogContent>
     </Dialog>

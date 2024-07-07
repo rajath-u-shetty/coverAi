@@ -53,9 +53,24 @@ export const letterContent = async (fileId: string, content: string) => {
     }
   })
 
-  if(!file) throw new Error("File not foun");
+  if(!file) throw new Error("File not found");
 
   try {
+    let uniqueFileName = file.name;
+    let fileExists = await db.file.findFirst({
+      where: {
+        name: uniqueFileName,
+        id: fileId 
+      }
+    });
+
+    while (fileExists) {
+      uniqueFileName = `${file.name}-${Date.now()}`;
+      fileExists = await db.file.findFirst({
+        where: { name: uniqueFileName }
+      });
+    }
+
     const newCoverLetter = await db.coverLetter.create({
       data: {
         userId: userId,
@@ -68,8 +83,30 @@ export const letterContent = async (fileId: string, content: string) => {
 
     return newCoverLetter;
   } catch (error) {
+
+    console.log(error);
     throw new Error("Failed to create cover letter");
   }
 };
 
+export const getCoverLetter = async (id: string) => {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
 
+  const userId = session?.user.id;
+
+  if (!userId) throw new Error("Unauthorized");
+
+  const coverLetter = await db.coverLetter.findFirst({
+    where: {
+      userId: userId,
+      id: id
+    }
+  })
+
+  if(!coverLetter) throw new Error("Cover Letter not found");
+
+  return coverLetter;
+};

@@ -10,13 +10,10 @@ import { toast } from "./ui/use-toast";
 import { useRouter } from "next/navigation";
 import { CoverLetter } from "@prisma/client";
 import { useRef } from "react";
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
 
 export const History = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const printRef = useRef(null);
 
   const { data: coverLetters, isLoading, error } = useQuery({
     queryKey: ["coverLetter"],
@@ -36,13 +33,8 @@ export const History = () => {
       if (err instanceof AxiosError) {
         if (err.response?.status === 409) {
           return toast({
-            title: "Subreddit already exists",
+            title: "file does not exists",
             description: "Please choose another name",
-            variant: "destructive",
-          });
-        } else if (err.response?.status === 422) {
-          return toast({
-            description: "Please choose a name between 3 and 21 characters",
             variant: "destructive",
           });
         } else if (err.response?.status === 401) {
