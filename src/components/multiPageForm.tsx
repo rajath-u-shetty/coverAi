@@ -48,7 +48,7 @@ const MultiPageForm = () => {
 
   const isLoading = form.formState.isSubmitting;
 
-  const handleFileUpload = (parsedText: string, fileId: string) => { 
+  const handleFileUpload = (parsedText: string, fileId: string) => {
     // console.log("File uploaded:", parsedText);
     // console.log("File ID:", fileId);
     setFileId(fileId);
@@ -111,22 +111,21 @@ const MultiPageForm = () => {
       // setDialogContent(finalText);
       // const formattedText = formatDialogContent(dialogContent);
 
-     const formattedContent = formatDialogContent(finalText);
-      console.log(formattedContent); 
+      const formattedContent = formatDialogContent(finalText);
 
-      console.log(finalText); 
-    if (!fileId) {
-      toast({
-        title: "Something went wrong",
-        description: "Please try again later @multipageform",
-        variant: "destructive",
-      });
-      return;
-    }
+      //console.log(finalText); 
+      if (!fileId) {
+        toast({
+          title: "Something went wrong",
+          description: "Please try again later @multipageform",
+          variant: "destructive",
+        });
+        return;
+      }
 
-    await letterContent(fileId, formattedContent); 
+      await letterContent(fileId, formattedContent);
 
-    form.reset();
+      form.reset();
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -137,26 +136,27 @@ const MultiPageForm = () => {
     }
   };
 
- const formatDialogContent = (text: string) => {
-  const paragraphs = text
-    .split("\n")
-    .filter((paragraph) => paragraph.trim() !== "")
-    .map((paragraph) => `<p class="my-2">${paragraph}</p>`);
-  return paragraphs.join("");
-};
+  const formatDialogContent = (text: string) => {
+    const paragraphs = text
+      .split("\n")
+      .filter((paragraph) => paragraph.trim() !== "")
+      .map((paragraph) => `<p class="my-2">${paragraph}</p>`);
+    return paragraphs.join("");
+  };
 
-const formatTextForDisplay = (text: string) => {
-  const paragraphs = text
-    .split("\n")
-    .filter((paragraph) => paragraph.trim() !== "");
-  return paragraphs.map((paragraph, index) => (
-    <p key={index} className="my-2">
-      {paragraph}
-    </p>
-  ));
-};
+  const formatTextForDisplay = (text: string) => {
+    const paragraphs = text
+      .split("\n")
+      .filter((paragraph) => paragraph.trim() !== "");
+    return paragraphs.map((paragraph, index) => (
+      <p key={index} className="my-2">
+        {paragraph}
+      </p>
+    ));
+  };
 
- 
+
+
 
   const copyToClipboard = () => {
     navigator.clipboard

@@ -53,14 +53,14 @@ export const letterContent = async (fileId: string, content: string) => {
     }
   })
 
-  if(!file) throw new Error("File not found");
+  if (!file) throw new Error("File not found");
 
   try {
     let uniqueFileName = file.name;
     let fileExists = await db.file.findFirst({
       where: {
         name: uniqueFileName,
-        id: fileId 
+        id: fileId
       }
     });
 
@@ -106,7 +106,7 @@ export const getCoverLetter = async (id: string) => {
     }
   })
 
-  if(!coverLetter) throw new Error("Cover Letter not found");
+  if (!coverLetter) throw new Error("Cover Letter not found");
 
   return coverLetter;
 };
