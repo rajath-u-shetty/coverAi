@@ -20,5 +20,10 @@ export const deleteValidator = z.object({
 
 export type DeletePayload = z.infer<typeof deleteValidator>;
 
+export const updateValidator = z.object({
+  id: z.string({ message: "File ID is required" }),
+  content: z.string({ message: "Content is required" }),
+});
 
+export type UpdatePayload = z.infer<typeof updateValidator>;
 

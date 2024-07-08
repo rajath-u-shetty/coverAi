@@ -1,7 +1,5 @@
 import { ModeToggle } from "@/components/ModeToggle";
-import UserAuthForm from "@/components/UserAuthForm";
-import UserDropdown from "@/components/UserDropDown";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,7 +9,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { getAuthSession } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { FileTerminal, History } from "lucide-react";
 import Link from "next/link";
@@ -32,7 +29,7 @@ const page = () => {
       title: "View History",
       description: "Checkout your previous generations",
       href: "/history",
-      tag: "Download",
+      tag: "View",
       footer: "",
     },
   ];
@@ -42,7 +39,7 @@ const page = () => {
       <div className="">
         <div className="p-10">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl">DashBoard</h1>
+            <h1 className="text-3xl">Dashboard</h1>
             <ModeToggle />
           </div>
           <Separator className="my-3" />

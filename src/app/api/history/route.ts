@@ -2,7 +2,6 @@ import { getAuthSession } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { deleteValidator } from "@/lib/validator";
 import { NextRequest } from "next/server";
-import { z } from "zod";
 
 export async function GET() {
   const session = await getAuthSession();

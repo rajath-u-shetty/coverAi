@@ -110,3 +110,38 @@ export const getCoverLetter = async (id: string) => {
 
   return coverLetter;
 };
+
+export const updateCoverLetterContent = async (id: string, content: string) => {
+  const session = await getAuthSession();
+  if (!session?.user) {
+    throw new Error("Unauthorized");
+  }
+
+  const userId = session?.user.id;
+
+  if (!userId) throw new Error("Unauthorized");
+
+  const coverLetter = await db.coverLetter.findFirst({
+    where: {
+      userId: userId,
+      id: id
+    }
+  })
+
+  if (!coverLetter) throw new Error("Cover Letter not found");
+
+  try {
+    await db.coverLetter.update({
+      where: {
+        id: id
+      },
+      data: {
+        content: content
+      }
+    })
+    return coverLetter;
+  } catch (error) {
+    console.log(error);
+    throw new Error("Failed to update cover letter");
+  }
+};

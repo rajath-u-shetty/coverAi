@@ -27,6 +27,7 @@ import {
 import { Copy } from "lucide-react";
 import { letterContent } from "@/actions/file";
 import { formValidator } from "@/lib/validator";
+import { useRouter } from "next/navigation";
 
 const MultiPageForm = () => {
   const [parsedPdfText, setParsedPdfText] = useState<string | null>(null);
@@ -34,6 +35,7 @@ const MultiPageForm = () => {
   const [dialogContent, setDialogContent] = useState("");
   const [fileId, setFileId] = useState<string | null>("");
   const { toast } = useToast();
+  const router = useRouter();
 
   let finalText = "";
 
@@ -126,6 +128,7 @@ const MultiPageForm = () => {
       await letterContent(fileId, formattedContent);
 
       form.reset();
+      
     } catch (error) {
       console.error("Error:", error);
       toast({
