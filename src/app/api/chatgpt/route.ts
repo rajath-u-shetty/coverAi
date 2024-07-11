@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
         {
           role: "system",
           content:
-            `You are an expert in writing professional cover letters.use the information from ${pdfFile} and use the actual information from the user to generate cover Letters. Your task is to generate a compelling and personalized cover letter based on the job title, job requirements, and the user's resume content provided by the user.`,
+            ` strictly use the info from the PDFile for user info You are an expert in writing professional cover letters.use the information from ${pdfFile} and use the actual information from the user to generate cover Letters. Your task is to generate a compelling and personalized cover letter based on the job title, job requirements, and the user's resume content provided by the user. while displaying content, never use brackets for user info for example [Rajath] is wrong, use Rajath only instead.`,
         },
         {
           role: "user",
@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       stream: true,
-    });
+    });                     
 
     return new NextResponse(
       new ReadableStream({

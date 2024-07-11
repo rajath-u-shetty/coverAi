@@ -13,7 +13,7 @@ import {
 import { Input } from "./ui/input";
 import UploadDropzone from "./UploadDropzone";
 import { Textarea } from "./ui/textarea";
-import { Button } from "./ui/button";
+import { Button, buttonVariants } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 import { Separator } from "./ui/separator";
 import React, { useState } from "react";
@@ -21,19 +21,22 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "./ui/dialog";
-import { Copy } from "lucide-react";
+import { Copy, Edit } from "lucide-react";
 import { letterContent } from "@/actions/file";
 import { formValidator } from "@/lib/validator";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 const MultiPageForm = () => {
   const [parsedPdfText, setParsedPdfText] = useState<string | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogContent, setDialogContent] = useState("");
   const [fileId, setFileId] = useState<string | null>("");
+  const [letterId, setLetterId] = useState<string | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -125,10 +128,12 @@ const MultiPageForm = () => {
         return;
       }
 
-      await letterContent(fileId, formattedContent);
+      const letter = await letterContent(fileId, formattedContent);
+
+      setLetterId(letter.id);
 
       form.reset();
-      
+
     } catch (error) {
       console.error("Error:", error);
       toast({
@@ -278,6 +283,14 @@ const MultiPageForm = () => {
         <DialogDescription className="mx-5 max-h-[400px] overflow-auto">
           {formatTextForDisplay(dialogContent)}
         </DialogDescription>
+        <DialogFooter className="">
+          <Link href={`/dashboard/${letterId}`}
+            className={buttonVariants({ className: "w-28 flex gap-2 -mt-1 font-bold bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-500 hover:bg-gradient-to-r hover:from-indigo-600 hover:via-sky-600 hover:to-cyan-500 ease-in-out absolute right-[10px] bottom-[-50px]" })}
+          >
+            <Edit className="h-4 w-4" />
+            Edit
+          </Link>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

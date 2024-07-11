@@ -11,11 +11,11 @@ export const HomePage = async () => {
     <div className="h-[50rem] w-full dark:bg-black bg-white  dark:bg-grid-white/[0.2] bg-grid-black/[0.2] relative flex flex-col items-center justify-center">
       <div className="absolute pointer-events-none inset-0 flex items-center justify-center dark:bg-black bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)]"></div>
       <IconAnimation />
-      <h3 className="text-bold text-4xl">
+      <h3 className="text-bold text-4xl bg-gradient-to-r from-blue-500 to-green-500 bg-clip-text text-transparent">
         Elevating Your Job Applications with AI-Powered Cover Letters.
       </h3>
       <p className="text-xl my-7 w-3/5 text-center">
-        Show them why you're perfect for the role with a professional level
+        Show them why you&apos;re perfect for the role with a professional level
         cover letter! Write it in seconds and get on with your life.
       </p>
 

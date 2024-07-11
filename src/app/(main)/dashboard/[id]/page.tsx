@@ -8,7 +8,6 @@ import { UpdatePayload } from "@/lib/validator";
 import axios, { AxiosError } from "axios";
 import { toast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { CoverLetter } from "@prisma/client";
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
