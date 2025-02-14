@@ -13,7 +13,7 @@ const SignIn = () => {
         {/* sign in form */}
         <UserAuthForm />
 
-        <p className="px-8 text-center text-sm text-zinc-700">
+        <p className="px-8 dark:text-gray-400 text-center text-sm text-zinc-700">
             New to Cover.Ai?{" "}
             <Link href="/sign-up" className="hover:text-zinc-800 text-sm underline underline-offset-4">Sign Up</Link>
         </p>

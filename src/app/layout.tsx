@@ -23,7 +23,7 @@ export default function RootLayout({
       <body className={cn(inter.className, "dark:bg-[rgb(18,18,18)]")}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
+          defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >

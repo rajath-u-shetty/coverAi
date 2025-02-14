@@ -1,4 +1,5 @@
 import { ModeToggle } from "@/components/ModeToggle";
+import UserDropdown from "@/components/UserDropDown";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -40,7 +41,10 @@ const page = () => {
         <div className="p-10">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl">Dashboard</h1>
-            <ModeToggle />
+            <div className="">
+              <ModeToggle />
+              <UserDropdown />
+            </div>
           </div>
           <Separator className="my-3" />
         </div>
