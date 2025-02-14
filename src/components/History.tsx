@@ -12,8 +12,6 @@ import { CoverLetter } from "@prisma/client";
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
 
-import { useRef } from "react";
-
 export const History = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
